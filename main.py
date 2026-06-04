@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 import os
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -36,6 +37,22 @@ def get_db():
         db.close()
 
 # ---------- Pydantic модели ----------
+class UpdateProfileRequest(BaseModel):
+    name: str
+    email: str
+    current_password: str
+
+class UpdatePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+class UpdateAvatarRequest(BaseModel):
+    avatar_url: str  # base64
+
+class UpdateCompanyYandexUrlRequest(BaseModel):
+    yandex_url: str
+    current_password: str
+
 class UserRegister(BaseModel):
     email: str
     password: str
@@ -144,7 +161,52 @@ def calculate_nps(reviews: List[Review]) -> int:
     return int((promoters - detractors) / total * 100)
 
 # ---------- Эндпоинты ----------
+@app.put("/api/users/update-profile")
+async def update_profile(user_id: int, req: UpdateProfileRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    if user.password != req.current_password:
+        raise HTTPException(401, "Неверный текущий пароль")
+    user.name = req.name
+    user.email = req.email
+    db.commit()
+    return {"status": "success", "user": {"id": user.id, "name": user.name, "email": user.email, "account_type": user.account_type}}
 
+@app.put("/api/users/update-password")
+async def update_password(user_id: int, req: UpdatePasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    if user.password != req.current_password:
+        raise HTTPException(401, "Неверный текущий пароль")
+    user.password = req.new_password
+    db.commit()
+    return {"status": "success"}
+
+@app.put("/api/users/update-avatar")
+async def update_avatar(user_id: int, req: UpdateAvatarRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    user.avatar_url = req.avatar_url
+    db.commit()
+    return {"status": "success", "avatar_url": user.avatar_url}
+
+@app.put("/api/users/update-company-yandex-url")
+async def update_company_yandex_url(user_id: int, req: UpdateCompanyYandexUrlRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+    if user.account_type != "company":
+        raise HTTPException(400, "Только для предприятий")
+    if user.password != req.current_password:
+        raise HTTPException(401, "Неверный пароль")
+    user.yandex_url = req.yandex_url
+    db.commit()
+    return {"status": "success", "yandex_url": user.yandex_url}
+
+#--------Основные Эндпоинты-----------------
 
 @app.post("/api/competitor/compare")
 async def compare_with_competitor(user_id: int, competitor_url: str, db: Session = Depends(get_db)):

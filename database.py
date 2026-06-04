@@ -17,6 +17,7 @@ class User(Base):
     account_type = Column(String, default="person")
     created_at = Column(DateTime, default=datetime.utcnow)
     yandex_url = Column(String, nullable=True)
+    avatar_url = Column(String, nullable=True)
 
     reviews = relationship("Review", back_populates="owner", cascade="all, delete-orphan")
 

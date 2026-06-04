@@ -10,29 +10,30 @@
         body { background-color: #0A0E17; color: white; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .glass { background: rgba(30, 35, 48, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .glass-gradient { background: linear-gradient(135deg, rgba(0, 255, 157, 0.05) 0%, rgba(0, 102, 255, 0.05) 100%); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .nav-btn { transition: all 0.3s ease; border-radius: 30px; padding: 8px 20px; color: rgba(255,255,255,0.6); font-size: 14px; }
+        .nav-btn { transition: all 0.3s ease; border-radius: 30px; padding: 8px 20px; color: rgba(255,255,255,0.6); font-size: 14px; cursor: pointer; }
         .nav-btn.active { background-color: #00FF9D; color: #0A0E17; font-weight: bold; }
         .hidden { display: none; }
         .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
-        .user-badge { background: linear-gradient(90deg, #00FF9D, #00D1FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Анимация появления блоков */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        /* Стили для кнопок профиля и настроек */
+        .btn-outline-green { border: 1px solid rgba(0, 255, 157, 0.5); color: #00FF9D; transition: all 0.2s; }
+        .btn-outline-green:hover { background: rgba(0, 255, 157, 0.15); border-color: #00FF9D; transform: scale(1.02); }
+        .btn-solid-green { background: #00FF9D; color: #0A0E17; transition: all 0.2s; }
+        .btn-solid-green:hover { background: #00cc7d; transform: scale(1.02); }
+        .btn-outline-blue { border: 1px solid rgba(59, 130, 246, 0.5); color: #60A5FA; transition: all 0.2s; }
+        .btn-outline-blue:hover { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; transform: scale(1.02); }
+        .btn-outline-purple { border: 1px solid rgba(168, 85, 247, 0.5); color: #c084fc; transition: all 0.2s; }
+        .btn-outline-purple:hover { background: rgba(168, 85, 247, 0.2); border-color: #a855f7; transform: scale(1.02); }
+        .avatar-clickable { cursor: pointer; transition: transform 0.2s; }
+        .avatar-clickable:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
 
-<!-- МОДАЛЬНОЕ ОКНО (как окно входа) -->
+<!-- МОДАЛЬНОЕ ОКНО -->
 <div id="custom-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center modal-bg p-4">
     <div class="glass w-full max-w-md p-8 rounded-[2.5rem] relative border border-[#00FF9D]/20">
         <button onclick="hideModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white text-xl">✕</button>
@@ -81,20 +82,20 @@
         <button onclick="showPage('home')" id="btn-home" class="nav-btn active">Главная</button>
         <button onclick="showPage('reviews')" id="btn-reviews" class="nav-btn">Отзывы</button>
         <button onclick="showPage('import')" id="btn-import" class="nav-btn">Импорт</button>
-        <button onclick="showPage('profile')" id="btn-profile" class="nav-btn hidden">Профиль</button>
         <button onclick="showPage('analytics')" id="btn-analytics" class="nav-btn hidden">Аналитика</button>
         <button onclick="showPage('competitor')" id="btn-competitor" class="nav-btn hidden">Конкуренты</button>
     </nav>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-3">
+        <!-- Аватар теперь кликабельный, ведёт в профиль -->
+        <div id="nav-avatar" class="avatar-clickable w-9 h-9 rounded-full bg-gradient-to-tr from-[#00FF9D] to-[#0066FF] flex items-center justify-center text-white font-bold text-sm" onclick="if(currentUser) showPage('profile')"></div>
         <button id="btn-login" onclick="toggleAuth(true)" class="nav-btn border border-[#00FF9D]/30 text-[#00FF9D] hover:bg-[#00FF9D]/10">Войти</button>
         <button onclick="logout()" id="btn-logout" class="nav-btn hidden text-red-400">Выйти</button>
     </div>
 </header>
 
 <main class="max-w-6xl mx-auto p-8">
-    <!-- СТРАНИЦА ГЛАВНАЯ -->
+    <!-- ГЛАВНАЯ -->
     <section id="page-home" class="space-y-20">
-        <!-- Hero -->
         <div class="text-center py-16 fade-up">
             <h1 class="text-8xl font-black mb-6 tracking-tighter bg-gradient-to-b from-white to-white/30 bg-clip-text text-transparent">Review Intelligence</h1>
             <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">Профессиональный ИИ-анализ отзывов для ресторанов, кафе и отелей. Повышайте качество сервиса с помощью данных.</p>
@@ -103,73 +104,29 @@
                 <button onclick="showPage('about')" class="glass px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white/10 transition-all">Узнать больше</button>
             </div>
         </div>
-
-        <!-- Три кита -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 fade-up">
-            <div class="glass p-8 rounded-3xl text-center border-l-4 border-[#00FF9D] transition-transform hover:scale-105">
-                <div class="text-5xl mb-4"></div>
-                <h3 class="text-2xl font-bold text-[#00FF9D] mb-3">Автоматизация</h3>
-                <p class="text-gray-400">Собирайте отзывы с Яндекс.Карт в один клик. Никакой рутины — только чистые данные.</p>
-            </div>
-            <div class="glass p-8 rounded-3xl text-center border-l-4 border-blue-500 transition-transform hover:scale-105">
-                <div class="text-5xl mb-4"></div>
-                <h3 class="text-2xl font-bold text-blue-500 mb-3">Искусственный интеллект</h3>
-                <p class="text-gray-400">Отечественный ИИ GigaChat анализирует тональность, выделяет сильные стороны и даёт рекомендации.</p>
-            </div>
-            <div class="glass p-8 rounded-3xl text-center border-l-4 border-red-500 transition-transform hover:scale-105">
-                <div class="text-5xl mb-4"></div>
-                <h3 class="text-2xl font-bold text-red-500 mb-3">Понятная аналитика</h3>
-                <p class="text-gray-400">NPS, графики динамики, сравнение с конкурентами — всё в одном месте.</p>
-            </div>
+            <div class="glass p-8 rounded-3xl text-center border-l-4 border-[#00FF9D] transition-transform hover:scale-105"><h3 class="text-2xl font-bold text-[#00FF9D] mb-3">Автоматизация</h3><p class="text-gray-400">Собирайте отзывы с Яндекс.Карт в один клик. Никакой рутины — только чистые данные.</p></div>
+            <div class="glass p-8 rounded-3xl text-center border-l-4 border-blue-500 transition-transform hover:scale-105"><h3 class="text-2xl font-bold text-blue-500 mb-3">Искусственный интеллект</h3><p class="text-gray-400">Отечественный ИИ GigaChat анализирует тональность, выделяет сильные стороны и даёт рекомендации.</p></div>
+            <div class="glass p-8 rounded-3xl text-center border-l-4 border-red-500 transition-transform hover:scale-105"><h3 class="text-2xl font-bold text-red-500 mb-3">Понятная аналитика</h3><p class="text-gray-400">NPS, графики динамики, сравнение с конкурентами — всё в одном месте.</p></div>
         </div>
-
-        <!-- Тестовый анализ -->
         <div class="glass p-10 rounded-[3rem] border border-white/5 fade-up">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-                <div class="space-y-6">
-                    <h2 class="text-4xl font-bold tracking-tight">Тестовый анализ</h2>
-                    <p class="text-gray-400">Проверьте возможности ИИ. Нейросеть определит тональность отзыва.</p>
-                    <textarea id="demo-input" rows="4" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl focus:outline-none focus:border-[#00FF9D] transition-all resize-none" placeholder="Напишите отзыв..."></textarea>
-                    <button onclick="runDemoAnalysis()" class="w-full py-4 border border-[#00FF9D] text-[#00FF9D] rounded-xl font-bold hover:bg-[#00FF9D] hover:text-black transition-all text-xs uppercase">Проанализировать</button>
-                </div>
-                <div id="demo-result" class="glass-gradient rounded-3xl p-8 min-h-[340px] flex items-center justify-center border border-white/10">
-                    <span class="text-gray-500 italic">Ожидание данных...</span>
-                </div>
+                <div class="space-y-6"><h2 class="text-4xl font-bold tracking-tight">Тестовый анализ</h2><p class="text-gray-400">Проверьте возможности ИИ. Нейросеть определит тональность отзыва.</p><textarea id="demo-input" rows="4" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl focus:outline-none focus:border-[#00FF9D] transition-all resize-none" placeholder="Напишите отзыв..."></textarea><button onclick="runDemoAnalysis()" class="w-full py-4 border border-[#00FF9D] text-[#00FF9D] rounded-xl font-bold hover:bg-[#00FF9D] hover:text-black transition-all text-xs uppercase">Проанализировать</button></div>
+                <div id="demo-result" class="glass-gradient rounded-3xl p-8 min-h-[340px] flex items-center justify-center border border-white/10"><span class="text-gray-500 italic">Ожидание данных...</span></div>
             </div>
         </div>
-
-        <!-- Почему выбирают нас -->
-        <div class="glass-gradient p-12 rounded-[3rem] fade-up">
-            <h2 class="text-4xl font-black text-center mb-12 tracking-tight">Почему <span class="text-[#00FF9D]">бизнес</span> выбирает нас</h2>
+        <div class="glass-gradient p-12 rounded-[3rem] fade-up"><h2 class="text-4xl font-black text-center mb-12 tracking-tight">Почему <span class="text-[#00FF9D]">бизнес</span> выбирает нас</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10">
-                    <span class="text-3xl">⚡</span>
-                    <div><span class="font-bold text-[#00FF9D]">Экономия времени</span><p class="text-gray-400">Ручной сбор отзывов занимает часы. Наш парсер делает это за минуты.</p></div>
-                </div>
-                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10">
-                    <span class="text-3xl">🧠</span>
-                    <div><span class="font-bold text-blue-500">Точность ИИ</span><p class="text-gray-400">GigaChat не просто считает звёзды, а понимает эмоции и скрытые жалобы.</p></div>
-                </div>
-                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10">
-                    <span class="text-3xl">📈</span>
-                    <div><span class="font-bold text-[#00FF9D]">Рост качества</span><p class="text-gray-400">Конкретные рекомендации по улучшению сервиса увеличивают лояльность.</p></div>
-                </div>
-                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10">
-                    <span class="text-3xl">🔒</span>
-                    <div><span class="font-bold text-blue-500">Ваши данные</span><p class="text-gray-400">Вся информация хранится локально, мы не передаём её третьим лицам.</p></div>
-                </div>
+                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10"><div><span class="font-bold text-[#00FF9D]">Экономия времени</span><p class="text-gray-400">Ручной сбор отзывов занимает часы. Наш парсер делает это за минуты.</p></div></div>
+                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10"><div><span class="font-bold text-blue-500">Точность ИИ</span><p class="text-gray-400">GigaChat не просто считает звёзды, а понимает эмоции и скрытые жалобы.</p></div></div>
+                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10"><div><span class="font-bold text-[#00FF9D]">Рост качества</span><p class="text-gray-400">Конкретные рекомендации по улучшению сервиса увеличивают лояльность.</p></div></div>
+                <div class="flex items-start gap-4 bg-white/5 p-5 rounded-2xl transition hover:bg-white/10"><div><span class="font-bold text-blue-500">Ваши данные</span><p class="text-gray-400">Вся информация хранится локально, мы не передаём её третьим лицам.</p></div></div>
             </div>
         </div>
-
-        <!-- Призыв к действию → переход на импорт -->
-        <div class="glass p-12 rounded-[3rem] text-center fade-up">
-            <h3 class="text-3xl font-bold mb-4">Готовы увидеть аналитику?</h3>
-            <p class="text-gray-400 mb-6">Перейдите в раздел импорта, чтобы начать сбор и анализ отзывов.</p>
-            <button onclick="showPage('import')" class="bg-[#00FF9D] text-black px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-all">Перейти к импорту</button>
-        </div>
+        <div class="glass p-12 rounded-[3rem] text-center fade-up"><h3 class="text-3xl font-bold mb-4">Готовы увидеть аналитику?</h3><p class="text-gray-400 mb-6">Перейдите в раздел импорта, чтобы начать сбор и анализ отзывов.</p><button onclick="showPage('import')" class="bg-[#00FF9D] text-black px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-all">Перейти к импорту</button></div>
     </section>
 
-    <!-- СТРАНИЦА ПРОФИЛЬ -->
+    <!-- ПРОФИЛЬ (исправлен: убран дублирующий статус, кнопки в едином стиле) -->
     <section id="page-profile" class="hidden">
         <div class="max-w-4xl mx-auto">
             <div class="glass-gradient p-12 rounded-[3rem] border border-white/10">
@@ -177,129 +134,67 @@
                 <h2 id="profile-name" class="text-4xl font-black text-center mb-2">Загрузка...</h2>
                 <p id="profile-email" class="text-gray-400 text-center mb-8 font-mono">email@example.com</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white/5 p-6 rounded-2xl">
-                        <span class="text-xs text-gray-500 uppercase font-bold">Тип аккаунта</span>
-                        <p id="profile-type" class="text-xl font-bold text-[#00FF9D]">Частное лицо</p>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-2xl">
-                        <span class="text-xs text-gray-500 uppercase font-bold">Статус</span>
-                        <p class="text-xl font-bold text-blue-400">Активен</p>
+                    <div class="bg-white/5 p-6 rounded-2xl"><span class="text-xs text-gray-500 uppercase font-bold">Тип аккаунта</span><p id="profile-type" class="text-xl font-bold text-[#00FF9D]">Частное лицо</p></div>
+                    <div class="bg-white/5 p-6 rounded-2xl flex items-center justify-center">
+                        <button onclick="showPage('settings')" class="btn-outline-green w-full py-3 rounded-xl font-bold transition-all">Настройки</button>
                     </div>
                 </div>
                 <div id="company-fields" class="hidden mt-8 space-y-6">
-                    <div class="border-t border-white/10 pt-6">
-                        <h3 class="text-xl font-bold mb-4 text-[#00FF9D]">Управление карточкой заведения</h3>
+                    <div class="border-t border-white/10 pt-6"><h3 class="text-xl font-bold mb-4 text-[#00FF9D]">Управление карточкой заведения</h3>
                         <div class="flex flex-col gap-4">
                             <input type="text" id="company-yandex-url" placeholder="Ссылка на Яндекс.Карты" class="bg-black/40 border border-white/10 p-4 rounded-xl w-full">
-                            <button onclick="updateCompanyUrl()" class="bg-blue-500/30 border border-blue-500 text-blue-400 py-2 rounded-xl hover:bg-blue-500/40 transition">Сохранить ссылку</button>
-                            <button onclick="refreshCompanyReviews()" class="bg-[#00FF9D]/20 border border-[#00FF9D] text-[#00FF9D] py-2 rounded-xl hover:bg-[#00FF9D]/30 transition">Обновить отзывы (парсинг)</button>
+                            <button onclick="updateCompanyUrl()" class="btn-outline-blue py-2 rounded-xl transition-all">Сохранить ссылку</button>
+                            <button onclick="refreshCompanyReviews()" class="btn-outline-green py-2 rounded-xl transition-all">Обновить отзывы (парсинг)</button>
                         </div>
                     </div>
                 </div>
-                <button onclick="logout()" class="mt-12 text-red-500 font-bold hover:text-red-400 transition-all uppercase text-xs block mx-auto">Выйти</button>
+                <button onclick="logout()" class="mt-12 btn-outline-red w-full py-3 rounded-xl font-bold text-red-400 border border-red-500/30 hover:bg-red-500/10 transition-all">Выйти</button>
             </div>
         </div>
     </section>
 
-    <!-- СТРАНИЦА ОТЗЫВЫ -->
+    <!-- ОТЗЫВЫ -->
     <section id="page-reviews" class="hidden space-y-8">
-        <div class="flex justify-between items-center bg-white/5 p-8 rounded-[2.5rem] border border-white/5">
-            <div>
-                <h2 class="text-3xl font-black tracking-tighter text-white mb-2">Архив отзывов</h2>
-                <p id="stats-summary" class="text-gray-400">Загрузка...</p>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="generateFullAnalysis()" class="bg-[#00FF9D] text-black px-8 py-4 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg shadow-[#00FF9D]/20">Анализ всей базы</button>
-                <button onclick="clearDatabase()" class="px-6 py-4 border border-red-500/30 text-red-500 rounded-2xl hover:bg-red-500/10 transition-all text-xs font-bold uppercase">Очистить</button>
-            </div>
-        </div>
-        <div id="ai-analytics-dashboard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/5 p-8 rounded-[2.5rem] border border-[#00FF9D]/30">
-            <div><span class="text-xs font-bold uppercase text-gray-400">NPS</span><div id="analytics-nps" class="text-6xl font-black text-[#00FF9D]">--</div></div>
-            <div><span class="text-xs font-bold uppercase text-gray-400">Сильные стороны</span><ul id="analytics-strengths" class="space-y-2 text-sm text-gray-200"></ul></div>
-            <div><span class="text-xs font-bold uppercase text-gray-400">Точки роста</span><ul id="analytics-recommendations" class="space-y-2 text-sm text-gray-200"></ul></div>
-            <div class="md:col-span-3 pt-6"><span class="text-xs font-bold uppercase text-gray-400">Вердикт</span><p id="analytics-verdict" class="text-base text-gray-300 italic"></p></div>
-        </div>
+        <div class="flex justify-between items-center bg-white/5 p-8 rounded-[2.5rem] border border-white/5"><div><h2 class="text-3xl font-black tracking-tighter text-white mb-2">Архив отзывов</h2><p id="stats-summary" class="text-gray-400">Загрузка...</p></div><div class="flex gap-4"><button onclick="generateFullAnalysis()" class="bg-[#00FF9D] text-black px-8 py-4 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg shadow-[#00FF9D]/20">Анализ всей базы</button><button onclick="clearDatabase()" class="px-6 py-4 border border-red-500/30 text-red-500 rounded-2xl hover:bg-red-500/10 transition-all text-xs font-bold uppercase">Очистить</button></div></div>
+        <div id="ai-analytics-dashboard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 bg-white/5 p-8 rounded-[2.5rem] border border-[#00FF9D]/30"><div><span class="text-xs font-bold uppercase text-gray-400">NPS</span><div id="analytics-nps" class="text-6xl font-black text-[#00FF9D]">--</div></div><div><span class="text-xs font-bold uppercase text-gray-400">Сильные стороны</span><ul id="analytics-strengths" class="space-y-2 text-sm text-gray-200"></ul></div><div><span class="text-xs font-bold uppercase text-gray-400">Точки роста</span><ul id="analytics-recommendations" class="space-y-2 text-sm text-gray-200"></ul></div><div class="md:col-span-3 pt-6"><span class="text-xs font-bold uppercase text-gray-400">Вердикт</span><p id="analytics-verdict" class="text-base text-gray-300 italic"></p></div></div>
         <div id="reviews-container" class="grid grid-cols-1 gap-4"></div>
     </section>
 
-    <!-- СТРАНИЦА ИМПОРТ (с новым дизайном) -->
+    <!-- НАСТРОЙКИ (кнопки улучшены) -->
+    <section id="page-settings" class="hidden pt-16 px-6 pb-20">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-4 mb-8"><button onclick="showPage('profile')" class="glass p-3 rounded-xl hover:bg-white/10 text-[#00FF9D]">← Назад к профилю</button><h2 class="text-4xl font-black">Настройки аккаунта</h2></div>
+            <div class="glass-gradient p-10 rounded-[3rem] border border-white/10 space-y-8">
+                <div><h3 class="text-xl font-bold text-[#00FF9D] mb-4">Аватар</h3><div class="flex items-center gap-6 flex-wrap"><div id="avatar-preview" class="w-24 h-24 bg-gradient-to-tr from-[#00FF9D] to-[#0066FF] rounded-full flex items-center justify-center text-3xl font-black text-black">?</div><label class="bg-white/10 hover:bg-white/20 cursor-pointer px-6 py-3 rounded-xl transition">Загрузить изображение<input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="previewAvatar(event)"></label><button onclick="saveAvatar()" class="btn-solid-green px-6 py-3 rounded-xl font-bold transition-all">Сохранить аватар</button></div></div>
+                <div class="border-t border-white/10 pt-6"><h3 class="text-xl font-bold text-blue-400 mb-4">Личные данные</h3><div class="space-y-4"><input type="text" id="settings-name" placeholder="Имя / Название" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><input type="email" id="settings-email" placeholder="Email" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><input type="password" id="settings-current-password" placeholder="Текущий пароль" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><button onclick="updateProfile()" class="btn-outline-blue w-full py-3 rounded-xl font-bold transition-all">Обновить данные</button></div></div>
+                <div class="border-t border-white/10 pt-6"><h3 class="text-xl font-bold text-purple-400 mb-4">Смена пароля</h3><div class="space-y-4"><input type="password" id="old-password" placeholder="Старый пароль" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><input type="password" id="new-password" placeholder="Новый пароль" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><input type="password" id="confirm-password" placeholder="Подтвердите новый пароль" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><button onclick="updatePassword()" class="btn-outline-purple w-full py-3 rounded-xl font-bold transition-all">Сменить пароль</button></div></div>
+                <div id="company-settings" class="border-t border-white/10 pt-6 hidden"><h3 class="text-xl font-bold text-[#00FF9D] mb-4">Управление карточкой Яндекс.Карт</h3><div class="space-y-4"><input type="text" id="settings-yandex-url" placeholder="Ссылка на Яндекс.Карты" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><input type="password" id="company-password-confirm" placeholder="Подтвердите пароль" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl"><button onclick="updateCompanyYandexUrl()" class="btn-solid-green w-full py-3 rounded-xl font-bold transition-all">Сохранить ссылку</button></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ИМПОРТ -->
     <section id="page-import" class="hidden pt-16 px-6 pb-20">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-4xl font-black uppercase tracking-tighter mb-12">Импорт <span class="text-[#00FF9D]">данных</span></h2>
-            <!-- Если не авторизован, показываем скруглённый блок -->
-            <div id="import-not-auth" class="glass p-12 rounded-[3rem] text-center hidden">
-                <p class="text-xl mb-4">Войдите в аккаунт для импорта отзывов</p>
-                <button onclick="toggleAuth(true)" class="bg-[#00FF9D] text-black px-6 py-3 rounded-xl font-bold">Войти / Зарегистрироваться</button>
-            </div>
-            <!-- Если авторизован, показываем формы -->
+        <div class="max-w-6xl mx-auto"><h2 class="text-4xl font-black uppercase tracking-tighter mb-12">Импорт <span class="text-[#00FF9D]">данных</span></h2>
+            <div id="import-not-auth" class="glass p-12 rounded-[3rem] text-center hidden"><p class="text-xl mb-4">Войдите в аккаунт для импорта отзывов</p><button onclick="toggleAuth(true)" class="bg-[#00FF9D] text-black px-6 py-3 rounded-xl font-bold">Войти / Зарегистрироваться</button></div>
             <div id="import-auth" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="glass p-10 rounded-[40px] flex flex-col justify-between h-full">
-                    <div>
-                        <h3 class="text-3xl font-bold mb-4 text-[#00FF9D]">Автоматически</h3>
-                        <input type="text" id="yandex-url" placeholder="https://maps.yandex.ru/..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-4">
-                        <input type="text" id="yandex-venue" placeholder="Название заведения" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6">
-                    </div>
-                    <button onclick="handleYandexImport()" class="w-full bg-[#00FF9D] text-black font-extrabold text-xs uppercase py-4 rounded-2xl hover:scale-105 transition-all">Запустить сбор</button>
-                </div>
-                <div class="glass p-10 rounded-[40px] flex flex-col justify-between h-full">
-                    <div>
-                        <h3 class="text-3xl font-bold mb-4 text-blue-400">Ручной</h3>
-                        <textarea id="manual-text" rows="6" placeholder="Вставьте текст отзыва..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6"></textarea>
-                        <input type="text" id="manual-venue" placeholder="Название заведения" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6">
-                    </div>
-                    <button onclick="handleManualImport()" class="w-full border border-[#00FF9D] text-[#00FF9D] font-extrabold text-xs uppercase py-4 rounded-2xl hover:bg-[#00FF9D]/10 transition-all">Добавить отзыв</button>
-                </div>
+                <div class="glass p-10 rounded-[40px] flex flex-col justify-between h-full"><div><h3 class="text-3xl font-bold mb-4 text-[#00FF9D]">Автоматически</h3><input type="text" id="yandex-url" placeholder="https://maps.yandex.ru/..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-4"><input type="text" id="yandex-venue" placeholder="Название заведения" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6"></div><button onclick="handleYandexImport()" class="w-full bg-[#00FF9D] text-black font-extrabold text-xs uppercase py-4 rounded-2xl hover:scale-105 transition-all">Запустить сбор</button></div>
+                <div class="glass p-10 rounded-[40px] flex flex-col justify-between h-full"><div><h3 class="text-3xl font-bold mb-4 text-blue-400">Ручной</h3><textarea id="manual-text" rows="6" placeholder="Вставьте текст отзыва..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6"></textarea><input type="text" id="manual-venue" placeholder="Название заведения" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm mb-6"></div><button onclick="handleManualImport()" class="w-full border border-[#00FF9D] text-[#00FF9D] font-extrabold text-xs uppercase py-4 rounded-2xl hover:bg-[#00FF9D]/10 transition-all">Добавить отзыв</button></div>
             </div>
         </div>
     </section>
 
-    <!-- Аналитика (график) -->
-    <section id="page-analytics" class="hidden pt-16 px-6 pb-20">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-4xl font-black mb-8">Динамика отзывов</h2>
-            <div class="glass p-8 rounded-3xl">
-                <canvas id="timelineChart" width="800" height="400"></canvas>
-            </div>
-        </div>
-    </section>
+    <!-- АНАЛИТИКА -->
+    <section id="page-analytics" class="hidden pt-16 px-6 pb-20"><div class="max-w-6xl mx-auto"><h2 class="text-4xl font-black mb-8">Динамика отзывов</h2><div class="glass p-8 rounded-3xl"><canvas id="timelineChart" width="800" height="400"></canvas></div></div></section>
 
-    <!-- Сравнение с конкурентом -->
-    <section id="page-competitor" class="hidden pt-16 px-6 pb-20">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-4xl font-black mb-4">Сравнение с конкурентом</h2>
-            <p class="text-gray-400 mb-8">Введите ссылку на карточку конкурента в Яндекс.Картах</p>
-            <div class="flex gap-4 mb-8">
-                <input type="text" id="competitor-url" placeholder="https://maps.yandex.ru/..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl">
-                <button onclick="analyzeCompetitor()" class="bg-[#00FF9D] text-black px-8 rounded-xl font-bold">Сравнить</button>
-            </div>
-            <div id="competitor-result" class="glass p-8 rounded-3xl hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div><h3 class="text-xl font-bold text-[#00FF9D] mb-3">Ваше заведение</h3><div id="my-stats"></div></div>
-                    <div><h3 class="text-xl font-bold text-blue-400 mb-3">Конкурент</h3><div id="competitor-stats"></div></div>
-                </div>
-                <div class="mt-8 pt-6 border-t border-white/10"><h3 class="text-xl font-bold text-purple-400 mb-3">Рекомендации ИИ</h3><div id="competitor-ai" class="text-gray-300 whitespace-pre-line"></div></div>
-            </div>
-        </div>
-    </section>
+    <!-- КОНКУРЕНТЫ -->
+    <section id="page-competitor" class="hidden pt-16 px-6 pb-20"><div class="max-w-6xl mx-auto"><h2 class="text-4xl font-black mb-4">Сравнение с конкурентом</h2><p class="text-gray-400 mb-8">Введите ссылку на карточку конкурента в Яндекс.Картах</p><div class="flex gap-4 mb-8"><input type="text" id="competitor-url" placeholder="https://maps.yandex.ru/..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl"><button onclick="analyzeCompetitor()" class="bg-[#00FF9D] text-black px-8 rounded-xl font-bold">Сравнить</button></div><div id="competitor-result" class="glass p-8 rounded-3xl hidden"><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div><h3 class="text-xl font-bold text-[#00FF9D] mb-3">Ваше заведение</h3><div id="my-stats"></div></div><div><h3 class="text-xl font-bold text-blue-400 mb-3">Конкурент</h3><div id="competitor-stats"></div></div></div><div class="mt-8 pt-6 border-t border-white/10"><h3 class="text-xl font-bold text-purple-400 mb-3">Рекомендации ИИ</h3><div id="competitor-ai" class="text-gray-300 whitespace-pre-line"></div></div></div></div></section>
 
-    <!-- Глубокий анализ (full-analysis) -->
-    <section id="page-full-analysis" class="hidden pt-16 px-6 pb-20">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex items-center gap-4 mb-10">
-                <button onclick="showPage('reviews')" class="glass p-3 rounded-xl hover:bg-white/10 text-[#00FF9D] text-sm uppercase tracking-wider">← Назад к отзывам</button>
-                <h2 class="text-4xl md:text-6xl font-black tracking-tighter bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Глубокий анализ</h2>
-            </div>
-            <div id="full-analysis-content" class="space-y-8">
-                <div class="glass p-10 rounded-3xl text-center">Загрузка данных...</div>
-            </div>
-        </div>
-    </section>
+    <!-- ГЛУБОКИЙ АНАЛИЗ -->
+    <section id="page-full-analysis" class="hidden pt-16 px-6 pb-20"><div class="max-w-6xl mx-auto"><div class="flex items-center gap-4 mb-10"><button onclick="showPage('reviews')" class="glass p-3 rounded-xl hover:bg-white/10 text-[#00FF9D] text-sm uppercase tracking-wider">← Назад к отзывам</button><h2 class="text-4xl md:text-6xl font-black tracking-tighter bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Глубокий анализ</h2></div><div id="full-analysis-content" class="space-y-8"><div class="glass p-10 rounded-3xl text-center">Загрузка данных...</div></div></div></section>
 </main>
 
-<!-- Подвал с версией -->
-<footer class="border-t border-white/10 mt-16 py-6 text-center text-gray-500 text-sm">
-    <p>Review Intelligence — анализ отзывов с помощью ИИ | Версия 1.01</p>
-</footer>
+<footer class="border-t border-white/10 mt-16 py-6 text-center text-gray-500 text-sm"><p>Review Intelligence — анализ отзывов с помощью ИИ | Версия 1.02.01</p></footer>
 
 <script>
     const API_URL = 'http://127.0.0.1:8000/api';
@@ -319,7 +214,6 @@
     }
     function hideModal() { document.getElementById('custom-modal').classList.add('hidden'); }
 
-    // Авторизация
     function setAuthMode(mode) {
         authMode = mode;
         const isReg = mode === 'reg';
@@ -336,6 +230,7 @@
         document.getElementById('type-company').className = type === 'company' ? active : inactive;
     }
     function toggleAuth(show) { document.getElementById('auth-modal').classList.toggle('hidden', !show); if(show) setAuthMode('login'); }
+
     async function handleAuthSubmit() {
         const email = document.getElementById('auth-email').value.trim();
         const password = document.getElementById('auth-pass').value.trim();
@@ -367,6 +262,7 @@
             } catch(e) { showModal("Ошибка регистрации", e.message, true); }
         }
     }
+
     function logout() {
         localStorage.removeItem('ri_user');
         currentUser = null;
@@ -374,22 +270,30 @@
         showPage('home');
         showModal("Выход", "Вы вышли из системы");
     }
+
     function updateUIForAuth() {
         const saved = localStorage.getItem('ri_user');
         if (saved && !currentUser) currentUser = JSON.parse(saved);
         const loginBtn = document.getElementById('btn-login');
         const logoutBtn = document.getElementById('btn-logout');
-        const profileNavBtn = document.getElementById('btn-profile');
         const analyticsBtn = document.getElementById('btn-analytics');
         const competitorBtn = document.getElementById('btn-competitor');
+        const navAvatar = document.getElementById('nav-avatar');
+        const profileInitialsDiv = document.getElementById('profile-initials');
         if (currentUser) {
             loginBtn.classList.add('hidden');
             logoutBtn.classList.remove('hidden');
-            profileNavBtn.classList.remove('hidden');
             document.getElementById('profile-name').innerText = currentUser.name;
             document.getElementById('profile-email').innerText = currentUser.email;
-            document.getElementById('profile-initials').innerText = currentUser.name[0].toUpperCase();
             document.getElementById('profile-type').innerText = currentUser.account_type === 'person' ? 'Частное лицо' : 'Предприятие';
+            if (currentUser.avatar_url && currentUser.avatar_url.startsWith('data:image')) {
+                navAvatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
+                profileInitialsDiv.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
+            } else {
+                const initial = currentUser.name[0].toUpperCase();
+                navAvatar.innerHTML = initial;
+                profileInitialsDiv.innerHTML = initial;
+            }
             const companyFields = document.getElementById('company-fields');
             if (currentUser.account_type === 'company') {
                 companyFields.classList.remove('hidden');
@@ -401,72 +305,41 @@
                 if (analyticsBtn) analyticsBtn.classList.add('hidden');
                 if (competitorBtn) competitorBtn.classList.add('hidden');
             }
-            // Показать авторизованный вид импорта
             document.getElementById('import-not-auth').classList.add('hidden');
             document.getElementById('import-auth').classList.remove('hidden');
         } else {
             loginBtn.classList.remove('hidden');
             logoutBtn.classList.add('hidden');
-            profileNavBtn.classList.add('hidden');
             if (analyticsBtn) analyticsBtn.classList.add('hidden');
             if (competitorBtn) competitorBtn.classList.add('hidden');
-            // Для неавторизованных на странице импорта показываем блок "Войдите для просмотра"
             document.getElementById('import-not-auth').classList.remove('hidden');
             document.getElementById('import-auth').classList.add('hidden');
         }
     }
 
-    async function updateCompanyUrl() {
-        if (!currentUser || currentUser.account_type !== 'company') return;
-        const newUrl = document.getElementById('company-yandex-url').value.trim();
-        if (!newUrl) return showModal("Ошибка", "Введите ссылку", true);
-        try {
-            const res = await fetch(`${API_URL}/users/update-yandex`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ user_id: currentUser.id, yandex_url: newUrl }) });
-            const data = await res.json();
-            if (res.ok) {
-                currentUser.yandex_url = newUrl;
-                localStorage.setItem('ri_user', JSON.stringify(currentUser));
-                showModal("Успешно", "Ссылка сохранена");
-            } else showModal("Ошибка", data.detail, true);
-        } catch(e) { showModal("Ошибка", e.message, true); }
-    }
-
-    async function refreshCompanyReviews() {
-        if (!currentUser || !currentUser.yandex_url) {
-            showModal("Ошибка", "Сначала сохраните ссылку на заведение", true);
-            return;
-        }
-        showModal("Парсинг", "Запущен сбор отзывов. Это может занять минуту.");
-        try {
-            const res = await fetch(`${API_URL}/import/yandex`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ url: currentUser.yandex_url, venue_name: currentUser.name, user_id: currentUser.id }) });
-            const data = await res.json();
-            if (res.ok) showModal("Запущено", data.message);
-            else showModal("Ошибка", data.detail, true);
-        } catch(e) { showModal("Ошибка", e.message, true); }
-    }
-
+    // ---------- Существующие функции (импорт, отзывы, анализ) ----------
     async function handleYandexImport() {
-        if(!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
+        if (!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
         const url = document.getElementById('yandex-url').value.trim();
         const venue = document.getElementById('yandex-venue').value.trim();
-        if(!url || !venue) return showModal("Ошибка", "Заполните ссылку и название", true);
+        if (!url || !venue) return showModal("Ошибка", "Заполните ссылку и название", true);
         try {
             const res = await fetch(`${API_URL}/import/yandex`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url, venue_name:venue, user_id:currentUser.id}) });
             const data = await res.json();
-            if(res.ok) showModal("Успешно", "Парсинг запущен. Отзывы появятся через минуту.");
+            if (res.ok) showModal("Успешно", "Парсинг запущен. Отзывы появятся через минуту.");
             else showModal("Ошибка", data.detail, true);
         } catch(e) { showModal("Ошибка сети", e.message, true); }
     }
 
     async function handleManualImport() {
-        if(!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
+        if (!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
         const text = document.getElementById('manual-text').value.trim();
         const venue = document.getElementById('manual-venue').value.trim() || "Ручной ввод";
-        if(!text) return showModal("Ошибка", "Введите текст отзыва", true);
+        if (!text) return showModal("Ошибка", "Введите текст отзыва", true);
         try {
             const res = await fetch(`${API_URL}/import/manual?user_id=${currentUser.id}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text, venue_name:venue}) });
             const data = await res.json();
-            if(res.ok) { showModal("Готово", data.message); document.getElementById('manual-text').value = ''; loadReviews(); }
+            if (res.ok) { showModal("Готово", data.message); document.getElementById('manual-text').value = ''; loadReviews(); }
             else showModal("Ошибка", data.detail, true);
         } catch(e) { showModal("Ошибка", e.message, true); }
     }
@@ -481,7 +354,7 @@
                     loadReviews();
                     document.getElementById('ai-analytics-dashboard').classList.add('hidden');
                 } else showModal("Ошибка", "Не удалось удалить отзывы", true);
-            } catch (e) { showModal("Ошибка", e.message, true); }
+            } catch(e) { showModal("Ошибка", e.message, true); }
         }
     }
 
@@ -506,16 +379,13 @@
                 else borderClass = "border-blue-500/70";
                 return `
                     <div class="glass p-6 rounded-[2rem] border-2 ${borderClass} transition-all">
-                        <div class="flex justify-between">
-                            <h4 class="text-xl font-bold">${escapeHtml(r.author_name)}</h4>
-                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${sentiment === 'positive' ? 'text-[#00FF9D]' : (sentiment === 'negative' ? 'text-red-500' : 'text-blue-500')}">${sentiment === 'positive' ? 'Позитивный' : (sentiment === 'negative' ? 'Негативный' : 'Нейтральный')}</span>
-                        </div>
+                        <div class="flex justify-between"><h4 class="text-xl font-bold">${escapeHtml(r.author_name)}</h4><span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${sentiment === 'positive' ? 'text-[#00FF9D]' : (sentiment === 'negative' ? 'text-red-500' : 'text-blue-500')}">${sentiment === 'positive' ? 'Позитивный' : (sentiment === 'negative' ? 'Негативный' : 'Нейтральный')}</span></div>
                         <p class="text-gray-300 mt-2">${escapeHtml(r.text)}</p>
                         <div class="mt-3 text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString()}</div>
                     </div>
                 `;
             }).join('');
-        } catch (e) { showModal("Ошибка", "Не удалось загрузить отзывы", true); }
+        } catch(e) { showModal("Ошибка", "Не удалось загрузить отзывы", true); }
     }
 
     function getSentimentByText(text) {
@@ -540,34 +410,17 @@
             if (!response.ok) throw new Error(data.detail);
             container.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass p-8 rounded-3xl text-center">
-                        <div class="text-6xl font-black text-[#00FF9D]">${data.nps}</div>
-                        <div class="text-xs uppercase tracking-wider text-gray-400 mt-2">NPS</div>
-                    </div>
-                    <div class="glass p-8 rounded-3xl text-center md:col-span-3">
-                        <div class="text-lg text-gray-300">${escapeHtml(data.verdict)}</div>
-                    </div>
+                    <div class="glass p-8 rounded-3xl text-center"><div class="text-6xl font-black text-[#00FF9D]">${data.nps}</div><div class="text-xs uppercase tracking-wider text-gray-400 mt-2">NPS</div></div>
+                    <div class="glass p-8 rounded-3xl text-center md:col-span-3"><div class="text-lg text-gray-300">${escapeHtml(data.verdict)}</div></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="glass p-8 rounded-3xl border-l-4 border-[#00FF9D]">
-                        <h3 class="text-2xl font-bold text-[#00FF9D] mb-4">Сильные стороны</h3>
-                        <div class="space-y-3">${data.strengths.map(s => `<div class="bg-white/5 p-3 rounded-xl">• ${escapeHtml(s)}</div>`).join('') || '<div class="text-gray-500">Не обнаружено</div>'}</div>
-                    </div>
-                    <div class="glass p-8 rounded-3xl border-l-4 border-red-500">
-                        <h3 class="text-2xl font-bold text-red-500 mb-4">Точки роста</h3>
-                        <div class="space-y-3">${data.weaknesses.map(w => `<div class="bg-white/5 p-3 rounded-xl">• ${escapeHtml(w)}</div>`).join('') || '<div class="text-gray-500">Нет явных проблем</div>'}</div>
-                    </div>
+                    <div class="glass p-8 rounded-3xl border-l-4 border-[#00FF9D]"><h3 class="text-2xl font-bold text-[#00FF9D] mb-4">Сильные стороны</h3><div class="space-y-3">${data.strengths.map(s => `<div class="bg-white/5 p-3 rounded-xl">• ${escapeHtml(s)}</div>`).join('') || '<div class="text-gray-500">Не обнаружено</div>'}</div></div>
+                    <div class="glass p-8 rounded-3xl border-l-4 border-red-500"><h3 class="text-2xl font-bold text-red-500 mb-4">Точки роста</h3><div class="space-y-3">${data.weaknesses.map(w => `<div class="bg-white/5 p-3 rounded-xl">• ${escapeHtml(w)}</div>`).join('') || '<div class="text-gray-500">Нет явных проблем</div>'}</div></div>
                 </div>
-                <div class="glass p-8 rounded-3xl bg-gradient-to-r from-blue-500/10 to-transparent mb-8">
-                    <h3 class="text-2xl font-bold text-blue-400 mb-4">Рекомендации ИИ</h3>
-                    <div class="text-gray-300 whitespace-pre-line">${escapeHtml(data.ai_recommendations || 'Нет данных')}</div>
-                </div>
-                <div class="glass p-8 rounded-3xl">
-                    <h3 class="text-2xl font-bold text-purple-400 mb-4">Краткий обзор</h3>
-                    <div class="text-gray-300">${generateOverview(data.nps)}</div>
-                </div>
+                <div class="glass p-8 rounded-3xl bg-gradient-to-r from-blue-500/10 to-transparent mb-8"><h3 class="text-2xl font-bold text-blue-400 mb-4">Рекомендации ИИ</h3><div class="text-gray-300 whitespace-pre-line">${escapeHtml(data.ai_recommendations || 'Нет данных')}</div></div>
+                <div class="glass p-8 rounded-3xl"><h3 class="text-2xl font-bold text-purple-400 mb-4">Краткий обзор</h3><div class="text-gray-300">${generateOverview(data.nps)}</div></div>
             `;
-        } catch (err) { container.innerHTML = `<div class="glass p-8 text-red-500 text-center">Ошибка: ${err.message}</div>`; }
+        } catch(err) { container.innerHTML = `<div class="glass p-8 text-red-500 text-center">Ошибка: ${err.message}</div>`; }
     }
 
     function generateOverview(npsStr) {
@@ -587,15 +440,15 @@
             const lower = input.toLowerCase();
             let sentiment = "Нейтральный";
             let sentimentColor = "text-blue-400";
-            const positiveWords = ["вкусн", "отличн", "хорош", "приятн", "быстр", "вежлив", "рекоменд", "классн", "супер"];
-            const negativeWords = ["плох", "ужасн", "грязн", "дорог", "долг", "холодн", "невкусн", "хам", "ошибк", "забыл"];
+            const positiveWords = ["вкусн","отличн","хорош","приятн","быстр","вежлив","рекоменд","классн","супер"];
+            const negativeWords = ["плох","ужасн","грязн","дорог","долг","холодн","невкусн","хам","ошибк","забыл"];
             let posCount = positiveWords.filter(w => lower.includes(w)).length;
             let negCount = negativeWords.filter(w => lower.includes(w)).length;
             if (posCount > negCount) { sentiment = "Позитивный"; sentimentColor = "text-[#00FF9D]"; }
             else if (negCount > posCount) { sentiment = "Негативный"; sentimentColor = "text-red-500"; }
             let allKeywords = [...positiveWords, ...negativeWords];
             let foundKeywords = allKeywords.filter(kw => lower.includes(kw));
-            let uniqueKeywords = [...new Set(foundKeywords)].slice(0, 5);
+            let uniqueKeywords = [...new Set(foundKeywords)].slice(0,5);
             let keywordsHtml = uniqueKeywords.length ? `<div class="mt-3 text-sm text-gray-400">Ключевые моменты: ${uniqueKeywords.join(", ")}</div>` : "";
             let reviewText = "";
             if (sentiment === "Позитивный") reviewText = "Пользователь в целом доволен, особенно отмечает положительные стороны.";
@@ -605,21 +458,6 @@
         }, 800);
     }
 
-    function showPage(pageId) {
-        if(pageId === 'profile' && !currentUser) { showModal("Вход", "Сначала войдите в аккаунт", true); toggleAuth(true); return; }
-        document.querySelectorAll('main > section').forEach(s => { s.classList.add('hidden'); });
-        const target = document.getElementById(`page-${pageId}`);
-        if(target) target.classList.remove('hidden');
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.getElementById(`btn-${pageId}`);
-        if(activeBtn) activeBtn.classList.add('active');
-        if(pageId === 'reviews') loadReviews();
-        if(pageId === 'analytics') loadTimeline();
-        window.scrollTo(0,0);
-    }
-
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-
     async function loadTimeline() {
         if (!currentUser) return;
         const res = await fetch(`${API_URL}/reviews/timeline?user_id=${currentUser.id}`);
@@ -627,14 +465,11 @@
         const ctx = document.getElementById('timelineChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: data.map(d => d.date),
-                datasets: [
-                    { label: 'Позитивные', data: data.map(d => d.positive), borderColor: '#00FF9D', tension: 0.3 },
-                    { label: 'Негативные', data: data.map(d => d.negative), borderColor: '#ff4444', tension: 0.3 },
-                    { label: 'Нейтральные', data: data.map(d => d.neutral), borderColor: '#4488ff', tension: 0.3 }
-                ]
-            },
+            data: { labels: data.map(d => d.date), datasets: [
+                { label: 'Позитивные', data: data.map(d => d.positive), borderColor: '#00FF9D', tension: 0.3 },
+                { label: 'Негативные', data: data.map(d => d.negative), borderColor: '#ff4444', tension: 0.3 },
+                { label: 'Нейтральные', data: data.map(d => d.neutral), borderColor: '#4488ff', tension: 0.3 }
+            ] },
             options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
         });
     }
@@ -656,19 +491,170 @@
         } catch(e) { showModal("Ошибка", e.message, true); }
     }
 
-    // Анимация появления блоков при скролле
-    const fadeElements = document.querySelectorAll('.fade-up');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+    async function updateCompanyUrl() {
+        if (!currentUser || currentUser.account_type !== 'company') return;
+        const newUrl = document.getElementById('company-yandex-url').value.trim();
+        if (!newUrl) return showModal("Ошибка", "Введите ссылку", true);
+        try {
+            const res = await fetch(`${API_URL}/users/update-yandex`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ user_id: currentUser.id, yandex_url: newUrl }) });
+            const data = await res.json();
+            if (res.ok) {
+                currentUser.yandex_url = newUrl;
+                localStorage.setItem('ri_user', JSON.stringify(currentUser));
+                showModal("Успешно", "Ссылка сохранена");
+            } else showModal("Ошибка", data.detail, true);
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+
+    async function refreshCompanyReviews() {
+        if (!currentUser || !currentUser.yandex_url) { showModal("Ошибка", "Сначала сохраните ссылку на заведение", true); return; }
+        showModal("Парсинг", "Запущен сбор отзывов. Это может занять минуту.");
+        try {
+            const res = await fetch(`${API_URL}/import/yandex`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ url: currentUser.yandex_url, venue_name: currentUser.name, user_id: currentUser.id }) });
+            const data = await res.json();
+            if (res.ok) showModal("Запущено", data.message);
+            else showModal("Ошибка", data.detail, true);
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+
+    // ---------- НОВЫЕ ФУНКЦИИ НАСТРОЕК ----------
+    let currentAvatarBase64 = null;
+    function previewAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').innerHTML = `<img src="${e.target.result}" class="w-full h-full rounded-full object-cover">`;
+                currentAvatarBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    async function saveAvatar() {
+        if (!currentUser) return;
+        if (!currentAvatarBase64) return showModal("Ошибка", "Выберите изображение", true);
+        try {
+            const res = await fetch(`${API_URL}/users/update-avatar?user_id=${currentUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar_url: currentAvatarBase64 })
+            });
+            if (res.ok) {
+                currentUser.avatar_url = currentAvatarBase64;
+                localStorage.setItem('ri_user', JSON.stringify(currentUser));
+                updateUIForAuth();
+                showModal("Успешно", "Аватар обновлён");
+            } else {
+                const err = await res.json();
+                showModal("Ошибка", err.detail, true);
             }
-        });
-    }, { threshold: 0.2 });
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+    async function updateProfile() {
+        if (!currentUser) return;
+        const name = document.getElementById('settings-name').value.trim();
+        const email = document.getElementById('settings-email').value.trim();
+        const currentPassword = document.getElementById('settings-current-password').value.trim();
+        if (!name || !email || !currentPassword) return showModal("Ошибка", "Заполните все поля", true);
+        try {
+            const res = await fetch(`${API_URL}/users/update-profile?user_id=${currentUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, current_password: currentPassword })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                currentUser.name = name;
+                currentUser.email = email;
+                localStorage.setItem('ri_user', JSON.stringify(currentUser));
+                updateUIForAuth();
+                showModal("Успешно", "Данные обновлены");
+                document.getElementById('settings-current-password').value = '';
+            } else showModal("Ошибка", data.detail, true);
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+    async function updatePassword() {
+        if (!currentUser) return;
+        const oldPass = document.getElementById('old-password').value.trim();
+        const newPass = document.getElementById('new-password').value.trim();
+        const confirmPass = document.getElementById('confirm-password').value.trim();
+        if (!oldPass || !newPass || !confirmPass) return showModal("Ошибка", "Заполните все поля", true);
+        if (newPass !== confirmPass) return showModal("Ошибка", "Новый пароль и подтверждение не совпадают", true);
+        try {
+            const res = await fetch(`${API_URL}/users/update-password?user_id=${currentUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ current_password: oldPass, new_password: newPass })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showModal("Успешно", "Пароль изменён");
+                document.getElementById('old-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            } else showModal("Ошибка", data.detail, true);
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+    async function updateCompanyYandexUrl() {
+        if (!currentUser || currentUser.account_type !== 'company') return;
+        const url = document.getElementById('settings-yandex-url').value.trim();
+        const password = document.getElementById('company-password-confirm').value.trim();
+        if (!url) return showModal("Ошибка", "Введите ссылку", true);
+        if (!password) return showModal("Ошибка", "Введите пароль для подтверждения", true);
+        try {
+            const res = await fetch(`${API_URL}/users/update-company-yandex-url?user_id=${currentUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ yandex_url: url, current_password: password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                currentUser.yandex_url = url;
+                localStorage.setItem('ri_user', JSON.stringify(currentUser));
+                showModal("Успешно", "Ссылка обновлена");
+                document.getElementById('company-password-confirm').value = '';
+            } else showModal("Ошибка", data.detail, true);
+        } catch(e) { showModal("Ошибка", e.message, true); }
+    }
+    function loadSettings() {
+        if (!currentUser) return;
+        document.getElementById('settings-name').value = currentUser.name || '';
+        document.getElementById('settings-email').value = currentUser.email || '';
+        if (currentUser.avatar_url) {
+            document.getElementById('avatar-preview').innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
+        } else {
+            document.getElementById('avatar-preview').innerHTML = currentUser.name[0].toUpperCase();
+        }
+        if (currentUser.account_type === 'company') {
+            document.getElementById('company-settings').classList.remove('hidden');
+            if (currentUser.yandex_url) document.getElementById('settings-yandex-url').value = currentUser.yandex_url;
+        } else {
+            document.getElementById('company-settings').classList.add('hidden');
+        }
+    }
+
+    // ---------- НАВИГАЦИЯ ----------
+    function showPage(pageId) {
+        if (pageId === 'profile' && !currentUser) { showModal("Вход", "Сначала войдите в аккаунт", true); toggleAuth(true); return; }
+        document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+        const target = document.getElementById(`page-${pageId}`);
+        if (target) target.classList.remove('hidden');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`btn-${pageId}`);
+        if (activeBtn) activeBtn.classList.add('active');
+        if (pageId === 'reviews') loadReviews();
+        if (pageId === 'analytics') loadTimeline();
+        if (pageId === 'settings') loadSettings();
+        window.scrollTo(0,0);
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m==='&' ? '&amp;' : m==='<' ? '&lt;' : '&gt;'); }
+
+    // Анимация появления
+    const fadeElements = document.querySelectorAll('.fade-up');
+    const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.2 });
     fadeElements.forEach(el => observer.observe(el));
 
-    // Инициализация
     updateUIForAuth();
     showPage('home');
 </script>
