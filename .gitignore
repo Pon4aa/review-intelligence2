@@ -1,3 +1,15 @@
 # Project exclude paths
-/.venv/
-/.env/
+*.pyc
+__pycache__/
+.env
+reviews.db
+.DS_Store
+*.sqlite
+*.sqlite3
+
+git init
+git add .
+git commit -m "Initial commit with Dockerfile and Playwright setup"
+git remote add origin https://github.com/Pon4aa/review-intelligence.git
+git branch -M main
+git push -u origin main
