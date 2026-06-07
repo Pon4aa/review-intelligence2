@@ -2,8 +2,12 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
+import os
 
-engine = create_engine('sqlite:///reviews.db', connect_args={"check_same_thread": False})
+# Определяем, где хранить БД
+DB_DIR = "/data" if os.path.exists("/data") else "."
+DB_PATH = os.path.join(DB_DIR, "reviews.db")
+engine = create_engine(f'sqlite:///{DB_PATH}', connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
