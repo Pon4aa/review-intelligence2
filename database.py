@@ -1,19 +1,23 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
-import os
 
-# Определяем, где хранить БД
-DB_DIR = "/data" if os.path.exists("/data") else "."
-DB_PATH = os.path.join(DB_DIR, "reviews.db")
+# Получаем URL базы данных из переменной окружения Render
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-DATABASE_URL = f"sqlite:///{DB_PATH}"
-engine = create_engine(f'sqlite:///{DB_PATH}', connect_args={"check_same_thread": False})
+# Если переменная не задана (локальная разработка), используем SQLite
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./reviews.db"
+    connect_args = {"check_same_thread": False}
+else:
+    # Для PostgreSQL на Render
+    connect_args = {}
 
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
 
 class User(Base):
     __tablename__ = "users"
@@ -27,8 +31,6 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
 
     reviews = relationship("Review", back_populates="owner", cascade="all, delete-orphan")
-
-
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -46,6 +48,5 @@ class Review(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="reviews")
 
-
-# Создаём таблицы
+# Создаём таблицы господи помоги
 Base.metadata.create_all(bind=engine)
