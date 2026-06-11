@@ -196,7 +196,7 @@
 <footer class="border-t border-white/10 mt-16 py-6 text-center text-gray-500 text-sm"><p>Review Intelligence — анализ отзывов с помощью ИИ | Версия 1.02.01</p></footer>
 
 <script>
-    const API_URL = 'http://127.0.0.1:8000/api';
+    const API_URL = window.location.origin + '/api';
     let currentUser = null;
     let authMode = 'login';
     let currentAccountType = 'person';
