@@ -1,8 +1,14 @@
-# Project exclude paths
-*.pyc
-__pycache__/
+# Виртуальное окружение
+venv/
+env/
+
+# Файлы IDE
+.idea/
+.vscode/
+
+# Файлы проекта и БД
 .env
-reviews.db
-.DS_Store
+*.db
 *.sqlite
 *.sqlite3
+__pycache__/

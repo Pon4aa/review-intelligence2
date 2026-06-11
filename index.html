@@ -101,7 +101,6 @@
             <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">Профессиональный ИИ-анализ отзывов для ресторанов, кафе и отелей. Повышайте качество сервиса с помощью данных.</p>
             <div class="flex justify-center gap-4">
                 <button onclick="showPage('import')" class="bg-[#00FF9D] text-[#0A0E17] px-10 py-5 rounded-2xl font-bold text-lg hover:scale-105 transition-all">Начать бесплатно</button>
-                <button onclick="showPage('about')" class="glass px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white/10 transition-all">Узнать больше</button>
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 fade-up">
@@ -271,51 +270,65 @@
         showModal("Выход", "Вы вышли из системы");
     }
 
-    function updateUIForAuth() {
-        const saved = localStorage.getItem('ri_user');
-        if (saved && !currentUser) currentUser = JSON.parse(saved);
-        const loginBtn = document.getElementById('btn-login');
-        const logoutBtn = document.getElementById('btn-logout');
-        const analyticsBtn = document.getElementById('btn-analytics');
-        const competitorBtn = document.getElementById('btn-competitor');
-        const navAvatar = document.getElementById('nav-avatar');
-        const profileInitialsDiv = document.getElementById('profile-initials');
-        if (currentUser) {
-            loginBtn.classList.add('hidden');
-            logoutBtn.classList.remove('hidden');
-            document.getElementById('profile-name').innerText = currentUser.name;
-            document.getElementById('profile-email').innerText = currentUser.email;
-            document.getElementById('profile-type').innerText = currentUser.account_type === 'person' ? 'Частное лицо' : 'Предприятие';
-            if (currentUser.avatar_url && currentUser.avatar_url.startsWith('data:image')) {
-                navAvatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
-                profileInitialsDiv.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
-            } else {
-                const initial = currentUser.name[0].toUpperCase();
-                navAvatar.innerHTML = initial;
-                profileInitialsDiv.innerHTML = initial;
-            }
-            const companyFields = document.getElementById('company-fields');
-            if (currentUser.account_type === 'company') {
-                companyFields.classList.remove('hidden');
-                if (currentUser.yandex_url) document.getElementById('company-yandex-url').value = currentUser.yandex_url;
-                if (analyticsBtn) analyticsBtn.classList.remove('hidden');
-                if (competitorBtn) competitorBtn.classList.remove('hidden');
-            } else {
-                companyFields.classList.add('hidden');
-                if (analyticsBtn) analyticsBtn.classList.add('hidden');
-                if (competitorBtn) competitorBtn.classList.add('hidden');
-            }
-            document.getElementById('import-not-auth').classList.add('hidden');
-            document.getElementById('import-auth').classList.remove('hidden');
+function updateUIForAuth() {
+    const saved = localStorage.getItem('ri_user');
+    if (saved && !currentUser) currentUser = JSON.parse(saved);
+    const loginBtn = document.getElementById('btn-login');
+    const logoutBtn = document.getElementById('btn-logout');
+    const analyticsBtn = document.getElementById('btn-analytics');
+    const competitorBtn = document.getElementById('btn-competitor');
+    const navAvatar = document.getElementById('nav-avatar');
+    const profileInitialsDiv = document.getElementById('profile-initials');
+
+    if (currentUser) {
+        // Авторизован: показываем кнопку "Выйти", скрываем "Войти"
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+        // Показываем аватар
+        if (navAvatar) navAvatar.classList.remove('hidden');
+        // Заполняем данные профиля
+        document.getElementById('profile-name').innerText = currentUser.name;
+        document.getElementById('profile-email').innerText = currentUser.email;
+        document.getElementById('profile-type').innerText = currentUser.account_type === 'person' ? 'Частное лицо' : 'Предприятие';
+        // Устанавливаем аватар (изображение или букву)
+        if (currentUser.avatar_url && currentUser.avatar_url.startsWith('data:image')) {
+            navAvatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
+            if (profileInitialsDiv) profileInitialsDiv.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full rounded-full object-cover">`;
         } else {
-            loginBtn.classList.remove('hidden');
-            logoutBtn.classList.add('hidden');
+            const initial = currentUser.name[0].toUpperCase();
+            navAvatar.innerHTML = initial;
+            if (profileInitialsDiv) profileInitialsDiv.innerHTML = initial;
+        }
+        // Управление полями предприятия
+        const companyFields = document.getElementById('company-fields');
+        if (currentUser.account_type === 'company') {
+            companyFields.classList.remove('hidden');
+            if (currentUser.yandex_url) document.getElementById('company-yandex-url').value = currentUser.yandex_url;
+            if (analyticsBtn) analyticsBtn.classList.remove('hidden');
+            if (competitorBtn) competitorBtn.classList.remove('hidden');
+        } else {
+            companyFields.classList.add('hidden');
             if (analyticsBtn) analyticsBtn.classList.add('hidden');
             if (competitorBtn) competitorBtn.classList.add('hidden');
-            document.getElementById('import-not-auth').classList.remove('hidden');
-            document.getElementById('import-auth').classList.add('hidden');
+        }
+        // Импорт формы для авторизованных
+        document.getElementById('import-not-auth').classList.add('hidden');
+        document.getElementById('import-auth').classList.remove('hidden');
+    } else {
+        // Не авторизован: скрываем аватар, показываем кнопку "Войти"
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+        if (analyticsBtn) analyticsBtn.classList.add('hidden');
+        if (competitorBtn) competitorBtn.classList.add('hidden');
+        document.getElementById('import-not-auth').classList.remove('hidden');
+        document.getElementById('import-auth').classList.add('hidden');
+        // Скрываем аватар и очищаем его содержимое
+        if (navAvatar) {
+            navAvatar.classList.add('hidden');
+            navAvatar.innerHTML = '';
         }
     }
+}
 
     // ---------- Существующие функции (импорт, отзывы, анализ) ----------
     async function handleYandexImport() {
