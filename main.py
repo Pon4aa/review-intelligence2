@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
 import os
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -28,6 +29,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 def get_db():
     db = SessionLocal()
