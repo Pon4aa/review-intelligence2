@@ -7,7 +7,10 @@ import os
 # Определяем, где хранить БД
 DB_DIR = "/data" if os.path.exists("/data") else "."
 DB_PATH = os.path.join(DB_DIR, "reviews.db")
+
+DATABASE_URL = f"sqlite:///{DB_PATH}"
 engine = create_engine(f'sqlite:///{DB_PATH}', connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

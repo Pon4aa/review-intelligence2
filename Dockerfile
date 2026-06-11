@@ -1,7 +1,7 @@
-# Используем официальный образ Python 3.12
+# Используем официальный образ Python
 FROM python:3.12-slim
 
-# Устанавливаем системные зависимости для Playwright (нужны для запуска Chromium)
+# Устанавливаем системные зависимости для Playwright
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -30,20 +30,18 @@ RUN apt-get update && apt-get install -y \
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файлы с зависимостями
+# Копируем зависимости и устанавливаем их
 COPY requirements.txt .
-
-# Устанавливаем Python-пакеты
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Устанавливаем браузеры Playwright
+# Устанавливаем браузер Chromium для Playwright
 RUN playwright install chromium
 
-# Копируем весь код проекта
+# Копируем остальной код
 COPY . .
 
-# Открываем порт (обычно 8000)
+# Открываем порт
 EXPOSE 8000
 
-# Команда запуска (используем uvicorn, без --reload в продакшне)
+# Команда для запуска приложения
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
