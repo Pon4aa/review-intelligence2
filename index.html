@@ -422,32 +422,43 @@
         if (activeBtn) activeBtn.classList.add('active');
     }
 
-async function handleYandexImport() {
-    if (!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
-    const url = document.getElementById('yandex-url').value.trim();
-    const venue = document.getElementById('yandex-venue').value.trim();
-    if (!url || !venue) return showModal("Ошибка", "Заполните ссылку и название", true);
+    async function handleYandexImport() {
+        if (!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
+        const url = document.getElementById('yandex-url').value.trim();
+        const venue = document.getElementById('yandex-venue').value.trim();
+        if (!url || !venue) return showModal("Ошибка", "Заполните ссылку и название", true);
 
-    // Показываем спиннер
-    const loadingEl = document.getElementById('loading-modal');
-    if (loadingEl) loadingEl.classList.remove('hidden');
-    document.getElementById('loading-text').innerText = "Парсинг отзывов...";
-
-    try {
-        const res = await fetch(`${API_URL}/import/yandex`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url, venue_name:venue, user_id:currentUser.id}) });
-        const data = await res.json();
-        // Скрываем спиннер
-        if (loadingEl) loadingEl.classList.add('hidden');
-        if (res.ok) {
-            showModal("Парсинг запущен", "Отзывы будут загружены в базу данных. Перейдите во вкладку 'Отзывы' для их просмотра и анализа.");
-        } else {
-            showModal("Ошибка", data.detail, true);
+        // Показываем спиннер
+        const loadingModal = document.getElementById('loading-modal');
+        const loadingText = document.getElementById('loading-text');
+        if (loadingModal && loadingText) {
+            loadingText.innerText = "Парсинг отзывов...";
+            loadingModal.classList.remove('hidden');
         }
-    } catch(e) {
-        if (loadingEl) loadingEl.classList.add('hidden');
-        showModal("Ошибка сети", e.message, true);
+
+        try {
+            const res = await fetch(`${API_URL}/import/yandex`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, venue_name: venue, user_id: currentUser.id })
+            });
+            const data = await res.json();
+
+            // Скрываем спиннер через 2 секунды (чтобы пользователь увидел процесс)
+            setTimeout(() => {
+                if (loadingModal) loadingModal.classList.add('hidden');
+                if (res.ok) {
+                    showModal("Парсинг запущен", "Отзывы будут загружены в базу данных. Перейдите во вкладку 'Отзывы' для их просмотра и анализа.");
+                } else {
+                    showModal("Ошибка", data.detail, true);
+                }
+            }, 2000);
+        } catch (error) {
+            // При ошибке скрываем спиннер сразу
+            if (loadingModal) loadingModal.classList.add('hidden');
+            showModal("Ошибка сети", error.message, true);
+        }
     }
-}
 
     async function handleManualImport() {
         if (!currentUser) { showModal("Требуется авторизация", "Войдите в аккаунт", true); toggleAuth(true); return; }
